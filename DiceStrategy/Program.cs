@@ -1,36 +1,89 @@
 ﻿using DiceStrategy;
+using DiceStrategy.Factories;
+using DiceStrategy.Factories.Interfaces;
+using DiceStrategy.Players;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 
-var winRecord = new Dictionary<string, int>();
+Console.CursorVisible = false;
 
-int gameTotal = 1_000_000;
+var playData = new Dictionary<string, PlayerReportData>();
 
-var gameFactory = new GameFactory();
+int gameTotal = 10_000_000;
+int gameCount = 0;
+int reportInterval = 5000;
 
-var query = from i in ParallelEnumerable.Range(0, gameTotal)
-            select gameFactory.Create().PlayAsync();
-Console.WriteLine("Dicegame Strategy Simulator");
+IGameFactory gameFactory = new AllPlayerGameFactory();
 
 Stopwatch stopWatch = new();
+
+Console.WriteLine("Dicegame Strategy Simulator");
+Console.WriteLine("No games played yet");
+
+var reportTimer = new Timer((x) => ReportOnGames());
+
+reportTimer.Change(reportInterval, reportInterval);
 stopWatch.Start();
-foreach (Task<PlayerBase> gameTask in query)
+foreach (var gameTask in from i in ParallelEnumerable.Range(0, gameTotal)
+                         select gameFactory.Create().PlayAsync())
 {
-    PlayerBase winner = await gameTask;
-    if (winRecord.ContainsKey(winner.Name))
-        winRecord[winner.Name]++;
-    else
-        winRecord[winner.Name] = 1;
+    (PlayerBase winner, IReadOnlyCollection<PlayerBase> players) = await gameTask;
+    gameCount++;
+
+    foreach (var player in players)
+    {
+        if (playData.ContainsKey(player.Name))
+        {
+            var playerData = playData[player.Name];
+            playerData.AverageDiceTotal = (playerData.AverageDiceTotal * (gameCount-1) + player.AverageDiceTotal) / gameCount;
+        } 
+        else
+        {
+            playData[player.Name] = new PlayerReportData(player.Name, player.Score);
+        }
+
+    }
+
+    playData[winner.Name].Wins++;
+
 }
 stopWatch.Stop();
 
-Console.WriteLine("After {0} games played in {1}:", gameTotal, stopWatch.Elapsed.ToString());
-foreach (var winsPerPlayer in winRecord)
+reportTimer.Dispose();
+
+ReportOnGames();
+
+void ReportOnGames()
 {
-    string name = winsPerPlayer.Key;
-    double winAmount = winsPerPlayer.Value;
-    int percentage = (int)Math.Round(winAmount / gameTotal * 100);
+    Console.SetCursorPosition(0, 0);
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.AppendFormat("Dicegame Strategy Simulator");
+    stringBuilder.AppendLine();
+    if (gameCount < gameTotal)
+    {
+        stringBuilder.AppendFormat("After {0:n0} games of {1:n0} played in {2}:", gameCount, gameTotal, stopWatch.Elapsed.ToString());
+    } 
+    else
+    {
+        stringBuilder.AppendFormat("After all {0:n0} games have been played in {1}:", gameCount, stopWatch.Elapsed.ToString());
+    }
+    stringBuilder.AppendLine();
 
-    Console.WriteLine("{0} won {1} times, that is {2}%", name, winAmount, percentage);
+    var playDataQuery = from p in playData
+            let player = p.Value
+            orderby player.Wins descending
+            select p.Value ;
+
+    foreach (var playerData in playDataQuery)
+    {
+        string name = playerData.Name;
+        double winAmount = playerData.Wins;
+        double percentage = winAmount / (double)gameCount * 100;
+
+        stringBuilder.AppendFormat("{0} won {1:n0} times, that is {2:n}% with an average score of {3:n}", name, winAmount, percentage, playerData.AverageDiceTotal);
+        stringBuilder.AppendLine();
+    }
+    Console.Write(stringBuilder.ToString());
+    Console.ReadKey();
 }
-Console.ReadKey();
-

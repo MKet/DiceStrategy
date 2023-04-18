@@ -4,11 +4,11 @@ namespace DiceStrategy;
 public class DiceSet
 {
     public IReadOnlyCollection<Die> Dice { get; }
-    public IEnumerable<Die> UnchosenDie => from die in Dice
+    public IEnumerable<Die> UnchosenDice => from die in Dice
                                            where die.IsChosen == false
                                            select die;
 
-    public IEnumerable<Die> ChosenDie => from die in Dice
+    public IEnumerable<Die> ChosenDice => from die in Dice
                                          where die.IsChosen == true
                                          select die;
 
@@ -42,7 +42,7 @@ public class DiceSet
 
     public void RollDice()
     {
-        foreach (Die die in Dice)
+        foreach (Die die in UnchosenDice)
         {
             die.Roll();
         }

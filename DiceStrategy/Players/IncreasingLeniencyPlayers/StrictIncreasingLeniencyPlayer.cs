@@ -1,7 +1,7 @@
-﻿namespace DiceStrategy.Players;
-public class IncreasingLeniencyPlayer : PlayerBase
+﻿namespace DiceStrategy.Players.IncreasingLeniencyPlayers;
+public class StrictIncreasingLeniencyPlayer : PlayerBase
 {
-    public IncreasingLeniencyPlayer(string name) : base($"{nameof(IncreasingLeniencyPlayer)}: {name}")
+    public StrictIncreasingLeniencyPlayer(string name) : base($"{nameof(StrictIncreasingLeniencyPlayer)}: {name}")
     {
     }
 
@@ -21,12 +21,12 @@ public class IncreasingLeniencyPlayer : PlayerBase
 
         foreach (Die die in query)
         {
-            die.IsChosen = (die.CurrentValue, set.UnchosenDie.Count()) switch
+            die.IsChosen = (die.CurrentValue, set.UnchosenDice.Count()) switch
             {
                 ( >= 6, _) => true,
                 ( >= 5, <= 4) => true,
-                ( >= 4, <= 2) => true,
-                ( >= 3, <= 1) => true,
+                ( >= 4, <= 3) => true,
+                ( >= 3, <= 2) => true,
                 (_, _) => false
             };
 
