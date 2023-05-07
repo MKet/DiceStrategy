@@ -1,13 +1,14 @@
-﻿namespace DiceStrategy.Reporting;
+﻿using DiceStrategy.Game.Players;
+
+namespace DiceStrategy.Reporting;
 
 public class PlayerReportData
 {
-    public PlayerReportData(string name, double averageDiceTotal, int wins)
-    {
-        Name = name;
-        AverageDiceTotal = averageDiceTotal;
-        Wins = wins;
-    }
+    public string Name { get; set; }
+
+    public double AverageDiceTotal { get; set; }
+
+    public int Wins { get; set; } = 0;
 
     public PlayerReportData(string name, double averageDiceTotal)
     {
@@ -15,11 +16,14 @@ public class PlayerReportData
         AverageDiceTotal = averageDiceTotal;
     }
 
-    public string Name { get; set; }
+    public PlayerReportData(string name, double averageDiceTotal, int wins) : this(name, averageDiceTotal)
+    {
+        Wins = wins;
+    }
 
-    public double AverageDiceTotal { get; set; }
-
-    public int Wins { get; set; } = 0;
+    public PlayerReportData(PlayerBase player) : this(player.Name, player.AverageDiceTotal)
+    {
+    }
 
     public override bool Equals(object? obj)
     {

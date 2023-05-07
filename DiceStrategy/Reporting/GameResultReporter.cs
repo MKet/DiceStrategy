@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using DiceStrategy.Game;
+using System.Diagnostics;
 using System.Text;
 
 namespace DiceStrategy.Reporting;
@@ -28,11 +29,11 @@ public abstract class GameResultReporter
         _stopWatch.Start();
     }
 
-    public void AddGameResults(Game.Players.PlayerBase winner, IReadOnlyCollection<Game.Players.PlayerBase> players)
+    public void AddGameResults(GameResult gameResult)
     {
         _gameCount++;
 
-        foreach (var player in players)
+        foreach (var player in gameResult.Players)
         {
             if (playData.ContainsKey(player.Name))
             {
@@ -41,11 +42,11 @@ public abstract class GameResultReporter
             }
             else
             {
-                playData[player.Name] = new PlayerReportData(player.Name, player.AverageDiceTotal);
+                playData[player.Name] = new PlayerReportData(player);
             }
         }
 
-        playData[winner.Name].Wins++;
+        playData[gameResult.Winner.Name].Wins++;
     }
 
     public void PrintReport()
@@ -66,14 +67,9 @@ public abstract class GameResultReporter
             return stringBuilder.ToString();
         }
 
-        if (_gameCount < gameTotal)
-        {
-            _ = stringBuilder.AppendFormat("After {0:n0} games of {1:n0} played in {2}:", _gameCount, gameTotal, _stopWatch.Elapsed.ToString());
-        }
-        else
-        {
-            _ = stringBuilder.AppendFormat("After all {0:n0} games have been played in {1}:", _gameCount, _stopWatch.Elapsed.ToString());
-        }
+        _ = _gameCount < gameTotal
+            ? stringBuilder.AppendFormat("After {0:n0} games of {1:n0} played in {2}:", _gameCount, gameTotal, _stopWatch.Elapsed.ToString())
+            : stringBuilder.AppendFormat("After all {0:n0} games have been played in {1}:", _gameCount, _stopWatch.Elapsed.ToString());
         _ = stringBuilder.AppendLine();
 
         var playDataQuery = from p in playData

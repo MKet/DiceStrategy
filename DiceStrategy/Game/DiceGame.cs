@@ -17,12 +17,7 @@ public class DiceGame
         _alivePlayers = new List<PlayerBase>(_players);
     }
 
-    public Task<(PlayerBase, IReadOnlyCollection<PlayerBase>)> PlayAsync()
-    {
-        return Task.FromResult(Play());
-    }
-
-    public (PlayerBase, IReadOnlyCollection<PlayerBase>) Play()
+    public GameResult Play()
     {
         var damageToNext = 0;
         var i = 0;
@@ -37,7 +32,7 @@ public class DiceGame
 
                 if (_alivePlayers.Count == 1)
                 {
-                    return (currentPlayer, Players);
+                    return new GameResult(currentPlayer, Players);
                 }
             }
 

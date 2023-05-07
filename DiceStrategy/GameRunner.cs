@@ -14,14 +14,13 @@ public class GameRunner
         this.gameResultReporter = gameResultReporter;
     }
 
-    public async Task RunAsync(int gameAmount)
+    public void Run(int gameAmount)
     {
-        var games = from i in ParallelEnumerable.Range(0, gameAmount)
-                    select gameFactory.Create().PlayAsync();
-        foreach (var gameTask in games)
+        var games = ParallelEnumerable.Range(0, gameAmount)
+                    .Select((i) => gameFactory.Create().Play());
+        foreach (var gameResult in games)
         {
-            (var winner, var players) = await gameTask;
-            gameResultReporter.AddGameResults(winner, players);
+            gameResultReporter.AddGameResults(gameResult);
         }
     }
 }
