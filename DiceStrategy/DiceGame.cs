@@ -1,22 +1,21 @@
 ﻿using DiceStrategy.Players;
+using System.Collections.Generic;
 
 namespace DiceStrategy;
 public class DiceGame
 {
     private readonly int _goalScore = 30;
+    private readonly DiceModel _dice;
+    private readonly List<PlayerBase> _players;
+    private readonly List<PlayerBase> _alivePlayers;
 
-    private readonly DiceModel dice;
-
-    private IEnumerable<PlayerBase> AlivePlayers => from player in Players
-                                                    where player.Score > 0
-                                                    select player;
-
-    public IReadOnlyCollection<PlayerBase> Players { get; }
+    public IReadOnlyCollection<PlayerBase> Players => _players.AsReadOnly();
 
     public DiceGame(Random random, params PlayerBase[] players)
     {
-        dice = new DiceModel(random);
-        Players = players.OrderBy(x => random.Next(100)).ToList().AsReadOnly();
+        _dice = new DiceModel(random);
+        _players = players.OrderBy(x => random.Next(100)).ToList();
+        _alivePlayers = new List<PlayerBase>(_players);
     }
 
     public Task<(PlayerBase, IReadOnlyCollection<PlayerBase>)> PlayAsync() => Task.FromResult(Play());
@@ -24,52 +23,59 @@ public class DiceGame
     public (PlayerBase, IReadOnlyCollection<PlayerBase>) Play()
     {
         int damageToNext = 0;
+        PlayerBase? lastPlayer = null;
+        int i = 0;
         while (true)
         {
-            foreach (PlayerBase? player in AlivePlayers)
+            PlayerBase currentPlayer = _alivePlayers[i];
+
+            currentPlayer.Health -= damageToNext;
+            if (currentPlayer.Health <= 0)
             {
-                var alivePlayer = AlivePlayers.ToArray();
-                if (alivePlayer.Length == 1)
+                _alivePlayers.RemoveAt(i);
+
+                if (_alivePlayers.Count == 1)
                 {
-                    return (alivePlayer[0], Players);
+                    return (currentPlayer, Players);
                 }
-                player.Score -= damageToNext;
-                damageToNext = 0;
-                if (player.Score <= 0)
-                {
-                    continue;
-                }
+            }
 
-                dice.Reset();
-                int totalDiceValue = player.Play(dice).TotalDicevalue;
+            _dice.Reset();
+            int totalDiceValue = currentPlayer.Play(_dice).TotalDicevalue;
 
-                damageToNext = RollNumber(totalDiceValue - _goalScore);
+            damageToNext = RollForDamage(totalDiceValue);
+            currentPlayer.Health -= (totalDiceValue < _goalScore) ? _goalScore - totalDiceValue : 0;
 
-                player.Score -= (totalDiceValue < _goalScore) ? _goalScore - totalDiceValue : 0;
+            lastPlayer = currentPlayer;
+            i++;
+            if (i >= _alivePlayers.Count)
+            {
+                i = 0;
             }
         }
     }
 
-    public int RollNumber(int number) {
-        if (number <= 0)
+    public int RollForDamage(int score) {
+        score -= _goalScore;
+        if (score <= 0)
             return 0;
-        dice.Reset();
+        _dice.Reset();
         while (true)
         {
             bool numberRolled = false;
-            dice.RollDice();
-            foreach (var die in dice.DiceResults)
+            _dice.RollDice();
+            foreach (var die in _dice.DiceResults)
             {
-                if (die == number)
+                if (die == score)
                 {
-                    dice.Choose(die);
+                    _dice.Choose(die);
                     numberRolled = true;
                 }
             }
             if (!numberRolled)
             {
-                int damage = dice.TotalDicevalue;
-                return (damage / number == 6) ? _goalScore : damage;
+                int damage = _dice.TotalDicevalue;
+                return (damage / score == 6) ? _goalScore : damage;
             }
         }
     }
