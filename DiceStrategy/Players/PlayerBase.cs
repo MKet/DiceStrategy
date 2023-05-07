@@ -3,7 +3,7 @@
 namespace DiceStrategy.Players;
 public abstract class PlayerBase
 {
-    public int Score { get; set; } = 30;
+    public int Health { get; set; } = 30;
     public string Name { get; }
     public bool WithTotalCheck { get; }
     private int _turnAmount = 0;
