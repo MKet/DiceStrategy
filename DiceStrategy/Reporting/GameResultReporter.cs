@@ -34,7 +34,7 @@ namespace DiceStrategy.Reporting
             _stopWatch.Start();
         }
 
-        public void AddGame(Game.Players.PlayerBase winner, IReadOnlyCollection<Game.Players.PlayerBase> players)
+        public void AddGameResults(Game.Players.PlayerBase winner, IReadOnlyCollection<Game.Players.PlayerBase> players)
         {
             _gameCount++;
 

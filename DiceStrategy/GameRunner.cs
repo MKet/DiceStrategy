@@ -29,7 +29,7 @@ namespace DiceStrategy
             foreach (var gameTask in games)
             {
                 (PlayerBase winner, IReadOnlyCollection<PlayerBase> players) = await gameTask;
-                gameResultReporter.AddGame(winner, players);
+                gameResultReporter.AddGameResults(winner, players);
             }
         }
     }
