@@ -12,8 +12,8 @@ public class IncreasingLeniencyGameFactory : IGameFactory
         var random = new Random(_random.Next());
         return new DiceGame(
             random,
-            new IncreasingLeniencyPlayer("Delta"),
-            new IncreasingLeniencyPlayerNoTotalCheck("Charlie")
+            new IncreasingLeniencyPlayer("Delta", true),
+            new IncreasingLeniencyPlayer("Charlie", false)
             );
     }
 }

@@ -12,11 +12,11 @@ public class AllPlayerGameFactory : IGameFactory
         var random = new Random(_random.Next());
         return new DiceGame(
             random,
-            new Only5OrHigherPlayerNoTotalCheck("Delta"),
-            new IncreasingLeniencyPlayer("Alice"),
-            new IncreasingLeniencyPlayerNoTotalCheck("Bob"),
-            new StrictIncreasingLeniencyPlayer("Charlie"),
-            new Only5OrHigherPlayer("Edward"),
-            new OnlyMaxOrHighestPlayer("Fred"));
+            new OnlyNOrHigherPlayer("Delta", 5, true),
+            new IncreasingLeniencyPlayer("Alice", false),
+            new IncreasingLeniencyPlayer("Bob", true),
+            new StrictIncreasingLeniencyPlayer("Charlie", true),
+            new OnlyNOrHigherPlayer("Edward", 5, false),
+            new OnlyNOrHigherPlayer("Fred", 6, true));
     }
 }

@@ -1,39 +1,19 @@
 ﻿namespace DiceStrategy.Players.IncreasingLeniencyPlayers;
 public class IncreasingLeniencyPlayer : PlayerBase
 {
-    public IncreasingLeniencyPlayer(string name) : base($"{nameof(IncreasingLeniencyPlayer)}: {name}")
+    public IncreasingLeniencyPlayer(string name, bool withTotalCheck) : base(name, withTotalCheck)
     {
     }
 
-    public override void ChooseDice(DiceSet set)
+    protected override Func<int, bool> GetChooseDiePredicate(DiceModel dice)
     {
-        if (set.TotalDicevalue >= 30)
+        return (die) => (die, dice.UnchosenDieAmount) switch
         {
-            set.ChooseAll();
-            return;
-        }
-
-        IOrderedEnumerable<Die>? query = from die in set.Dice
-                                         where die.IsChosen == false
-                                         orderby die.CurrentValue descending
-                                         select die;
-        query.First().IsChosen = true;
-
-        foreach (Die die in query)
-        {
-            die.IsChosen = (die.CurrentValue, set.UnchosenDice.Count()) switch
-            {
-                ( >= 6, _) => true,
-                ( >= 5, <= 3) => true,
-                ( >= 4, <= 2) => true,
-                ( >= 3, <= 1) => true,
-                (_, _) => false
-            };
-
-            if (!die.IsChosen)
-            {
-                break;
-            }
-        }
+            ( >= 6, _) => true,
+            ( >= 5, <= 3) => true,
+            ( >= 4, <= 2) => true,
+            ( >= 3, <= 1) => true,
+            (_, _) => false
+        };
     }
 }

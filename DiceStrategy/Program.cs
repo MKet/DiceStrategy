@@ -3,29 +3,26 @@ using DiceStrategy.Factories;
 using DiceStrategy.Factories.Interfaces;
 using DiceStrategy.Players;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 
 Console.CursorVisible = false;
 
-var playData = new Dictionary<string, PlayerReportData>();
+const int gameTotal = 10_000_000;
+const int reportInterval = 5000;
 
-int gameTotal = 10_000_000;
 int gameCount = 0;
-int reportInterval = 5000;
 
+var playData = new Dictionary<string, PlayerReportData>();
 IGameFactory gameFactory = new AllPlayerGameFactory();
-
-Stopwatch stopWatch = new();
 
 Console.WriteLine("Dicegame Strategy Simulator");
 Console.WriteLine("No games played yet");
 
+Stopwatch stopWatch = new();
 var reportTimer = new Timer((x) => ReportOnGames());
-
 reportTimer.Change(reportInterval, reportInterval);
 stopWatch.Start();
-foreach (var gameTask in from i in ParallelEnumerable.Range(0, gameTotal)
+foreach (var gameTask in from i in Enumerable.Range(0, gameTotal)
                          select gameFactory.Create().PlayAsync())
 {
     (PlayerBase winner, IReadOnlyCollection<PlayerBase> players) = await gameTask;
@@ -50,14 +47,14 @@ foreach (var gameTask in from i in ParallelEnumerable.Range(0, gameTotal)
 }
 stopWatch.Stop();
 
-reportTimer.Dispose();
+await reportTimer.DisposeAsync();
 
 ReportOnGames();
 
 void ReportOnGames()
 {
     Console.SetCursorPosition(0, 0);
-    StringBuilder stringBuilder = new StringBuilder();
+    var stringBuilder = new StringBuilder();
     stringBuilder.AppendFormat("Dicegame Strategy Simulator");
     stringBuilder.AppendLine();
     if (gameCount < gameTotal)
@@ -72,8 +69,7 @@ void ReportOnGames()
 
     var playDataQuery = from p in playData
             let player = p.Value
-            orderby player.Wins descending
-            select p.Value ;
+            select player;
 
     foreach (var playerData in playDataQuery)
     {

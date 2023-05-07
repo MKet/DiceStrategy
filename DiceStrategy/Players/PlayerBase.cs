@@ -1,42 +1,63 @@
-﻿namespace DiceStrategy.Players;
+﻿using System.Linq;
+
+namespace DiceStrategy.Players;
 public abstract class PlayerBase
 {
     public int Score { get; set; } = 30;
     public string Name { get; }
-
+    public bool WithTotalCheck { get; }
     private int _turnAmount = 0;
 
     public double AverageDiceTotal { get; private set; } = 0;
 
-    protected PlayerBase(string name) => Name = name;
-
-    public DiceSet Play(DiceSet set)
+    protected PlayerBase(string name, bool withTotalCheck, string? typeName = null)
     {
-        set.Reset();
-        _turnAmount++;
-        while (true)
+        typeName ??= GetType().Name;
+        if (withTotalCheck)
         {
-            set.RollDice();
-            ChooseDice(set);
+            typeName += "WithTotalCheck";
+        }
+        Name = $"{typeName}: {name}";
+        WithTotalCheck = withTotalCheck;
+    }
 
-            if (!set.UnchosenDice.Any())
-            {
-                break;
-            }
+    public DiceModel Play(DiceModel dice)
+    {
+        _turnAmount++;
+        while (dice.UnchosenDieAmount > 0)
+        {
+            dice.RollDice();
+            ChooseDice(dice);
         }
 
         if (AverageDiceTotal == 0)
         {
-            AverageDiceTotal = set.TotalDicevalue;
+            AverageDiceTotal = dice.TotalDicevalue;
         }
         else
         {
-            int diceValue = set.TotalDicevalue;
+            int diceValue = dice.TotalDicevalue;
 
             AverageDiceTotal = (AverageDiceTotal * (_turnAmount-1) + diceValue) / _turnAmount;
         }
-        return set;
+        return dice;
     }
 
-    public abstract void ChooseDice(DiceSet set);
+    private void ChooseDice(DiceModel dice)
+    {
+        if (WithTotalCheck && dice.TotalDicevalue >= 30)
+        {
+            dice.ChooseAll();
+            return;
+        }
+
+        dice.ChooseHighest();
+
+        foreach (var die in dice.DiceResults.Where(GetChooseDiePredicate(dice)))
+        {
+            dice.Choose(die);
+        }
+    }
+
+    protected abstract Func<int, bool> GetChooseDiePredicate(DiceModel dice);
 }
