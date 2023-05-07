@@ -1,6 +1,6 @@
-﻿using DiceStrategy.Game.Players.IncreasingLeniencyPlayers;
-using DiceStrategy.Factories.Interfaces;
+﻿using DiceStrategy.Factories.Interfaces;
 using DiceStrategy.Game;
+using DiceStrategy.Game.Players.IncreasingLeniencyPlayers;
 
 namespace DiceStrategy.Factories;
 public class IncreasingLeniencyGameFactory : IGameFactory

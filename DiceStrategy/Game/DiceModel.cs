@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-
-namespace DiceStrategy.Game;
+﻿namespace DiceStrategy.Game;
 public class DiceModel
 {
     private readonly int[] _dieResults;
@@ -33,9 +30,9 @@ public class DiceModel
     {
         get
         {
-            for (int i = _dieResults.Length - 1; i > 0; i--)
+            for (var i = _dieResults.Length - 1; i > 0; i--)
             {
-                for (int j = 0; j < _dieResults[i]; j++)
+                for (var j = 0; j < _dieResults[i]; j++)
                 {
                     yield return i + 1;
                 }
@@ -45,7 +42,7 @@ public class DiceModel
 
     public void ResetDiceResults()
     {
-        for (int i = 0; i < _dieResults.Length; i++)
+        for (var i = 0; i < _dieResults.Length; i++)
         {
             _dieResults[i] = 0;
         }
@@ -54,14 +51,17 @@ public class DiceModel
     public void Choose(int value)
     {
         if (_dieResults[value - 1] == 0)
+        {
             throw new ArgumentException("Dice value does not exist");
+        }
+
         TotalDicevalue += value;
         UnchosenDieAmount--;
     }
 
     public void ChooseAll()
     {
-        for (int i = 0; i < _dieResults.Length; i++)
+        for (var i = 0; i < _dieResults.Length; i++)
         {
             TotalDicevalue += (i + 1) * _dieResults[i];
             UnchosenDieAmount -= _dieResults[i];
@@ -71,7 +71,7 @@ public class DiceModel
     public void RollDice()
     {
         ResetDiceResults();
-        for (int i = 0; i < UnchosenDieAmount; i++)
+        for (var i = 0; i < UnchosenDieAmount; i++)
         {
             var roll = _random.Next(0, _dieResults.Length);
             _dieResults[roll]++;
@@ -80,7 +80,7 @@ public class DiceModel
 
     public int? ChooseHighest()
     {
-        for (int i = _dieResults.Length - 1; i > 0; i--)
+        for (var i = _dieResults.Length - 1; i > 0; i--)
         {
             if (_dieResults[i - 1] > 0)
             {

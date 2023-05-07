@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace DiceStrategy.Game.Players;
+﻿namespace DiceStrategy.Game.Players;
 public abstract class PlayerBase
 {
     public int Health { get; set; } = 30;
@@ -36,9 +34,9 @@ public abstract class PlayerBase
         }
         else
         {
-            int diceValue = dice.TotalDicevalue;
+            var diceValue = dice.TotalDicevalue;
 
-            AverageDiceTotal = (AverageDiceTotal * (_turnAmount - 1) + diceValue) / _turnAmount;
+            AverageDiceTotal = ((AverageDiceTotal * (_turnAmount - 1)) + diceValue) / _turnAmount;
         }
         return dice;
     }
@@ -51,7 +49,7 @@ public abstract class PlayerBase
             return;
         }
 
-        dice.ChooseHighest();
+        _ = dice.ChooseHighest();
 
         foreach (var die in dice.DiceResults.Where(GetChooseDiePredicate(dice)))
         {

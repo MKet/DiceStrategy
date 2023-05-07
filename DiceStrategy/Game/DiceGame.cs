@@ -1,5 +1,4 @@
 ﻿using DiceStrategy.Game.Players;
-using System.Collections.Generic;
 
 namespace DiceStrategy.Game;
 public class DiceGame
@@ -18,16 +17,18 @@ public class DiceGame
         _alivePlayers = new List<PlayerBase>(_players);
     }
 
-    public Task<(PlayerBase, IReadOnlyCollection<PlayerBase>)> PlayAsync() => Task.FromResult(Play());
+    public Task<(PlayerBase, IReadOnlyCollection<PlayerBase>)> PlayAsync()
+    {
+        return Task.FromResult(Play());
+    }
 
     public (PlayerBase, IReadOnlyCollection<PlayerBase>) Play()
     {
-        int damageToNext = 0;
-        PlayerBase? lastPlayer = null;
-        int i = 0;
+        var damageToNext = 0;
+        var i = 0;
         while (true)
         {
-            PlayerBase currentPlayer = _alivePlayers[i];
+            var currentPlayer = _alivePlayers[i];
 
             currentPlayer.Health -= damageToNext;
             if (currentPlayer.Health <= 0)
@@ -41,12 +42,10 @@ public class DiceGame
             }
 
             _dice.Reset();
-            int totalDiceValue = currentPlayer.Play(_dice).TotalDicevalue;
+            var totalDiceValue = currentPlayer.Play(_dice).TotalDicevalue;
 
             damageToNext = RollForDamage(totalDiceValue);
             currentPlayer.Health -= totalDiceValue < _goalScore ? _goalScore - totalDiceValue : 0;
-
-            lastPlayer = currentPlayer;
             i++;
             if (i >= _alivePlayers.Count)
             {
@@ -59,11 +58,14 @@ public class DiceGame
     {
         score -= _goalScore;
         if (score <= 0)
+        {
             return 0;
+        }
+
         _dice.Reset();
         while (true)
         {
-            bool numberRolled = false;
+            var numberRolled = false;
             _dice.RollDice();
             foreach (var die in _dice.DiceResults)
             {
@@ -75,7 +77,7 @@ public class DiceGame
             }
             if (!numberRolled)
             {
-                int damage = _dice.TotalDicevalue;
+                var damage = _dice.TotalDicevalue;
                 return damage / score == 6 ? _goalScore : damage;
             }
         }

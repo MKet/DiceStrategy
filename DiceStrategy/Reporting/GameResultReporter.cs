@@ -1,108 +1,101 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
+﻿using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace DiceStrategy.Reporting
+namespace DiceStrategy.Reporting;
+
+public abstract class GameResultReporter
 {
-    public abstract class GameResultReporter
+    private readonly Stopwatch _stopWatch;
+    private readonly Timer _reportTimer;
+    private readonly int reportInterval;
+
+    private int _gameCount = 0;
+    private readonly int gameTotal;
+
+    private readonly Dictionary<string, PlayerReportData> playData;
+
+    public GameResultReporter(int reportInterval, int gameTotal)
     {
-        private readonly Stopwatch _stopWatch;
-        private readonly Timer _reportTimer;
-        private readonly int reportInterval;
+        playData = new Dictionary<string, PlayerReportData>();
+        _stopWatch = new Stopwatch();
+        _reportTimer = new Timer((x) => PrintReport());
+        this.reportInterval = reportInterval;
+        this.gameTotal = gameTotal;
+    }
+    public void Start()
+    {
+        _ = _reportTimer.Change(0, reportInterval);
+        _stopWatch.Start();
+    }
 
-        private int _gameCount = 0;
-        private readonly int gameTotal;
+    public void AddGameResults(Game.Players.PlayerBase winner, IReadOnlyCollection<Game.Players.PlayerBase> players)
+    {
+        _gameCount++;
 
-        private readonly Dictionary<string, PlayerReportData> playData;
-
-        public GameResultReporter(int reportInterval, int gameTotal)
+        foreach (var player in players)
         {
-            playData = new Dictionary<string, PlayerReportData>();
-            _stopWatch = new Stopwatch();
-            _reportTimer = new Timer((x) => PrintReport());
-            this.reportInterval = reportInterval;
-            this.gameTotal = gameTotal;
-        }
-        public void Start()
-        {
-            _reportTimer.Change(0, reportInterval);
-            _stopWatch.Start();
-        }
-
-        public void AddGameResults(Game.Players.PlayerBase winner, IReadOnlyCollection<Game.Players.PlayerBase> players)
-        {
-            _gameCount++;
-
-            foreach (var player in players)
+            if (playData.ContainsKey(player.Name))
             {
-                if (playData.ContainsKey(player.Name))
-                {
-                    var playerData = playData[player.Name];
-                    playerData.AverageDiceTotal = (playerData.AverageDiceTotal * (_gameCount - 1) + player.AverageDiceTotal) / _gameCount;
-                }
-                else
-                {
-                    playData[player.Name] = new PlayerReportData(player.Name, player.AverageDiceTotal);
-                }
-            }
-
-            playData[winner.Name].Wins++;
-        }
-
-        public void PrintReport()
-        {
-            PrintReport(BuildReport());
-        }
-
-        protected abstract void PrintReport(string report);
-
-        private string BuildReport()
-        {
-            var stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("Dicegame Strategy Simulator");
-
-            if (_gameCount == 0)
-            {
-                stringBuilder.AppendLine("No games played yet.");
-                return stringBuilder.ToString();
-            }
-
-            if (_gameCount < gameTotal)
-            {
-                stringBuilder.AppendFormat("After {0:n0} games of {1:n0} played in {2}:", _gameCount, gameTotal, _stopWatch.Elapsed.ToString());
+                var playerData = playData[player.Name];
+                playerData.AverageDiceTotal = ((playerData.AverageDiceTotal * (_gameCount - 1)) + player.AverageDiceTotal) / _gameCount;
             }
             else
             {
-                stringBuilder.AppendFormat("After all {0:n0} games have been played in {1}:", _gameCount, _stopWatch.Elapsed.ToString());
+                playData[player.Name] = new PlayerReportData(player.Name, player.AverageDiceTotal);
             }
-            stringBuilder.AppendLine();
+        }
 
-            var playDataQuery = from p in playData
-                                let player = p.Value
-                                select player;
+        playData[winner.Name].Wins++;
+    }
 
-            foreach (var playerData in playDataQuery)
-            {
-                string name = playerData.Name;
-                double winAmount = playerData.Wins;
-                double percentage = winAmount / (double)_gameCount * 100;
+    public void PrintReport()
+    {
+        PrintReport(BuildReport());
+    }
 
-                stringBuilder.AppendFormat("{0} won {1:n0} times, that is {2:n}% with an average score of {3:n}", name, winAmount, percentage, playerData.AverageDiceTotal);
-                stringBuilder.AppendLine();
-            }
+    protected abstract void PrintReport(string report);
+
+    private string BuildReport()
+    {
+        var stringBuilder = new StringBuilder();
+        _ = stringBuilder.AppendLine("Dicegame Strategy Simulator");
+
+        if (_gameCount == 0)
+        {
+            _ = stringBuilder.AppendLine("No games played yet.");
             return stringBuilder.ToString();
         }
 
-        public void Stop()
+        if (_gameCount < gameTotal)
         {
-            _stopWatch.Stop();
-            _reportTimer.Dispose();
-            PrintReport();
+            _ = stringBuilder.AppendFormat("After {0:n0} games of {1:n0} played in {2}:", _gameCount, gameTotal, _stopWatch.Elapsed.ToString());
         }
+        else
+        {
+            _ = stringBuilder.AppendFormat("After all {0:n0} games have been played in {1}:", _gameCount, _stopWatch.Elapsed.ToString());
+        }
+        _ = stringBuilder.AppendLine();
+
+        var playDataQuery = from p in playData
+                            let player = p.Value
+                            select player;
+
+        foreach (var playerData in playDataQuery)
+        {
+            var name = playerData.Name;
+            double winAmount = playerData.Wins;
+            var percentage = winAmount / _gameCount * 100;
+
+            _ = stringBuilder.AppendFormat("{0} won {1:n0} times, that is {2:n}% with an average score of {3:n}", name, winAmount, percentage, playerData.AverageDiceTotal);
+            _ = stringBuilder.AppendLine();
+        }
+        return stringBuilder.ToString();
+    }
+
+    public void Stop()
+    {
+        _stopWatch.Stop();
+        _reportTimer.Dispose();
+        PrintReport();
     }
 }

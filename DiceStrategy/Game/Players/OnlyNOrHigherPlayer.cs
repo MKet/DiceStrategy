@@ -8,5 +8,8 @@ public class OnlyNOrHigherPlayer : PlayerBase
         _number = number;
     }
 
-    protected override Func<int, bool> GetChooseDiePredicate(DiceModel dice) => (die) => die >= _number;
+    protected override Func<int, bool> GetChooseDiePredicate(DiceModel dice)
+    {
+        return (die) => die >= _number;
+    }
 }
