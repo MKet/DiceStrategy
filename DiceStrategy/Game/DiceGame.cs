@@ -1,7 +1,7 @@
-﻿using DiceStrategy.Players;
+﻿using DiceStrategy.Game.Players;
 using System.Collections.Generic;
 
-namespace DiceStrategy;
+namespace DiceStrategy.Game;
 public class DiceGame
 {
     private readonly int _goalScore = 30;
@@ -44,7 +44,7 @@ public class DiceGame
             int totalDiceValue = currentPlayer.Play(_dice).TotalDicevalue;
 
             damageToNext = RollForDamage(totalDiceValue);
-            currentPlayer.Health -= (totalDiceValue < _goalScore) ? _goalScore - totalDiceValue : 0;
+            currentPlayer.Health -= totalDiceValue < _goalScore ? _goalScore - totalDiceValue : 0;
 
             lastPlayer = currentPlayer;
             i++;
@@ -55,7 +55,8 @@ public class DiceGame
         }
     }
 
-    public int RollForDamage(int score) {
+    public int RollForDamage(int score)
+    {
         score -= _goalScore;
         if (score <= 0)
             return 0;
@@ -75,7 +76,7 @@ public class DiceGame
             if (!numberRolled)
             {
                 int damage = _dice.TotalDicevalue;
-                return (damage / score == 6) ? _goalScore : damage;
+                return damage / score == 6 ? _goalScore : damage;
             }
         }
     }

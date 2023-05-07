@@ -1,4 +1,4 @@
-﻿namespace DiceStrategy.Players.IncreasingLeniencyPlayers;
+﻿namespace DiceStrategy.Game.Players.IncreasingLeniencyPlayers;
 public class StrictIncreasingLeniencyPlayer : PlayerBase
 {
     public StrictIncreasingLeniencyPlayer(string name, bool withTotalCheck) : base(name, withTotalCheck)

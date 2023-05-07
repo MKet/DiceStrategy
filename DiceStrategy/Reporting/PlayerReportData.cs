@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiceStrategy
+namespace DiceStrategy.Reporting
 {
     public class PlayerReportData
     {
@@ -26,5 +26,19 @@ namespace DiceStrategy
         public double AverageDiceTotal { get; set; }
 
         public int Wins { get; set; } = 0;
+
+        public override bool Equals(object? obj)
+        {
+            return ReferenceEquals(this, obj) ||
+                    obj is PlayerReportData data &&
+                   Name == data.Name &&
+                   AverageDiceTotal == data.AverageDiceTotal &&
+                   Wins == data.Wins;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, AverageDiceTotal, Wins);
+        }
     }
 }

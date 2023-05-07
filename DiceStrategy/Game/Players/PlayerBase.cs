@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace DiceStrategy.Players;
+namespace DiceStrategy.Game.Players;
 public abstract class PlayerBase
 {
     public int Health { get; set; } = 30;
@@ -38,7 +38,7 @@ public abstract class PlayerBase
         {
             int diceValue = dice.TotalDicevalue;
 
-            AverageDiceTotal = (AverageDiceTotal * (_turnAmount-1) + diceValue) / _turnAmount;
+            AverageDiceTotal = (AverageDiceTotal * (_turnAmount - 1) + diceValue) / _turnAmount;
         }
         return dice;
     }

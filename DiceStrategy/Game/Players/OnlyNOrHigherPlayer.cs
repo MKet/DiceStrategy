@@ -1,4 +1,4 @@
-﻿namespace DiceStrategy.Players;
+﻿namespace DiceStrategy.Game.Players;
 public class OnlyNOrHigherPlayer : PlayerBase
 {
     private readonly int _number;

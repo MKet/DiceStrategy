@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 
-namespace DiceStrategy;
+namespace DiceStrategy.Game;
 public class DiceModel
 {
     private readonly int[] _dieResults;
@@ -29,17 +29,18 @@ public class DiceModel
         UnchosenDieAmount = _totalDieAmount;
     }
 
-    public IEnumerable<int> DiceResults { 
+    public IEnumerable<int> DiceResults
+    {
         get
         {
             for (int i = _dieResults.Length - 1; i > 0; i--)
             {
-               for(int j = 0; j < _dieResults[i]; j++)
-               {
-                    yield return i+1;
-               }
+                for (int j = 0; j < _dieResults[i]; j++)
+                {
+                    yield return i + 1;
+                }
             }
-        } 
+        }
     }
 
     public void ResetDiceResults()
@@ -60,9 +61,9 @@ public class DiceModel
 
     public void ChooseAll()
     {
-        for (int i = 0; i < _dieResults.Length;i++)
+        for (int i = 0; i < _dieResults.Length; i++)
         {
-            TotalDicevalue += (i+1) * _dieResults[i];
+            TotalDicevalue += (i + 1) * _dieResults[i];
             UnchosenDieAmount -= _dieResults[i];
         }
     }
@@ -79,9 +80,9 @@ public class DiceModel
 
     public int? ChooseHighest()
     {
-        for (int i = _dieResults.Length-1; i > 0; i--)
+        for (int i = _dieResults.Length - 1; i > 0; i--)
         {
-            if (_dieResults[i-1] > 0)
+            if (_dieResults[i - 1] > 0)
             {
                 Choose(i);
                 return i;
